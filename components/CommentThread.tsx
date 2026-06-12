@@ -26,12 +26,13 @@ export default function CommentThread({ comment, depth = 0, showAdmin, onDelete 
   const [collapsed, setCollapsed] = useState(false);
   const [editing, setEditing] = useState(false);
   const [content, setContent] = useState(comment.content);
+  const votes = comment.votes ?? [];
   const score =
-    comment.votes.filter((v) => v.value === 1).length -
-    comment.votes.filter((v) => v.value === -1).length;
+    votes.filter((v) => v.value === 1).length -
+    votes.filter((v) => v.value === -1).length;
 
   async function handleDelete() {
-    if (!confirm("Delete this comment?")) return;
+
     await fetch(`/api/comments/${comment.id}`, { method: "DELETE" });
     onDelete?.(comment.id);
   }

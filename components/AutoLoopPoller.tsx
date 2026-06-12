@@ -31,28 +31,34 @@ export default function AutoLoopPoller() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
     let timer: ReturnType<typeof setTimeout>;
 
     async function tick() {
       const configRes = await fetch("/api/autoloop/config").catch(() => null);
+      if (cancelled) return;
       if (!configRes?.ok) { schedule(60); return; }
       const config = await configRes.json();
+      if (cancelled) return;
       if (!config.enabled) { schedule(config.intervalSeconds); return; }
 
       const res = await fetch("/api/autoloop/tick", { method: "POST" }).catch(() => null);
+      if (cancelled) return;
       if (res?.ok) {
         const result = await res.json();
+        if (cancelled) return;
         addToast(result);
+        window.dispatchEvent(new CustomEvent("bb:tick", { detail: result }));
       }
       schedule(config.intervalSeconds);
     }
 
     function schedule(seconds: number) {
-      timer = setTimeout(tick, seconds * 1000);
+      if (!cancelled) timer = setTimeout(tick, seconds * 1000);
     }
 
     tick();
-    return () => clearTimeout(timer);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [addToast]);
 
   if (toasts.length === 0) return null;

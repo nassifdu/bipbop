@@ -113,7 +113,7 @@ function SideLink({
         gap: "4px",
         padding: "6px 16px",
         fontSize: "13px",
-        fontFamily: mono ? "var(--font-mono)" : "var(--font-body)",
+        fontFamily: "var(--font-mono)",
         color: active ? "var(--accent)" : "var(--text-muted)",
         background: active ? "var(--accent-dim)" : "transparent",
         borderLeft: active ? "2px solid var(--accent)" : "2px solid transparent",

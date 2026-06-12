@@ -89,5 +89,6 @@ model AutoLoop {
   id              Int      @id @default(1)
   enabled         Boolean  @default(false)
   intervalSeconds Int      @default(45)
+  model           String   @default("google/gemma-3-4b-it")
   updatedAt       DateTime @updatedAt
 }

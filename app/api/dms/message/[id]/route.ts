@@ -3,6 +3,6 @@ import { prisma } from "@/lib/prisma";
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  await prisma.directMessage.delete({ where: { id } });
+  await prisma.directMessage.deleteMany({ where: { id } });
   return NextResponse.json({ ok: true });
 }

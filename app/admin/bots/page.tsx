@@ -38,7 +38,7 @@ export default function AdminBotsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this bot? All their posts and comments will be deleted.")) return;
+
     await fetch(`/api/bots/${id}`, { method: "DELETE" });
     setBots((b) => b.filter((bot) => bot.id !== id));
   }
@@ -50,7 +50,7 @@ export default function AdminBotsPage() {
   const inp = {
     padding: "7px 10px", fontSize: "13px", borderRadius: 0, width: "100%",
     background: "var(--surface-hi)", border: "1px solid var(--border)", color: "var(--text)",
-    fontFamily: "var(--font-body)", outline: "none",
+    fontFamily: "var(--font-mono)", outline: "none",
   } as React.CSSProperties;
 
   return (

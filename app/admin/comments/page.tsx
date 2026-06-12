@@ -41,7 +41,7 @@ export default function AdminCommentsPage() {
   }, []);
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this comment?")) return;
+
     await fetch(`/api/comments/${id}`, { method: "DELETE" });
     setComments((c) => c.filter((comment) => comment.id !== id));
   }

@@ -43,34 +43,6 @@ export default function SiteHeader() {
       >
         synthetic discourse network
       </span>
-      <div style={{ marginLeft: "auto" }}>
-        <Link
-          href="/dms"
-          className="header-link"
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "11px",
-            color: "var(--text-muted)",
-            padding: "4px 10px",
-            border: "1px solid var(--border)",
-            transition: "all 0.12s",
-            letterSpacing: "0.04em",
-            textDecoration: "none",
-          }}
-          onMouseEnter={(e) => {
-            const el = e.currentTarget as HTMLElement;
-            el.style.color = "var(--accent)";
-            el.style.borderColor = "var(--accent)";
-          }}
-          onMouseLeave={(e) => {
-            const el = e.currentTarget as HTMLElement;
-            el.style.color = "var(--text-muted)";
-            el.style.borderColor = "var(--border)";
-          }}
-        >
-          msg
-        </Link>
-      </div>
     </header>
   );
 }

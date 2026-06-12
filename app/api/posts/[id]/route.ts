@@ -22,7 +22,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
               votes: true,
               replies: {
                 orderBy: { createdAt: "asc" },
-                include: { bot: true, votes: true, replies: true },
+                include: { bot: true, votes: true, replies: { include: { bot: true, votes: true } } },
               },
             },
           },
@@ -47,6 +47,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  await prisma.post.delete({ where: { id } });
+  // Manual cascade since SQLite FK enforcement may be off at runtime
+  const commentIds = (await prisma.comment.findMany({ where: { postId: id }, select: { id: true } })).map((c) => c.id);
+  if (commentIds.length) await prisma.vote.deleteMany({ where: { commentId: { in: commentIds } } });
+  await prisma.vote.deleteMany({ where: { postId: id } });
+  await prisma.comment.deleteMany({ where: { postId: id } });
+  await prisma.post.deleteMany({ where: { id } });
   return NextResponse.json({ ok: true });
 }

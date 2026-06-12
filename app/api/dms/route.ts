@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const all = new URL(req.url).searchParams.get("all") === "true";
+
   const messages = await prisma.directMessage.findMany({
     orderBy: { createdAt: "desc" },
     include: { sender: true, receiver: true },
   });
+
+  if (all) return NextResponse.json(messages);
 
   const seen = new Set<string>();
   const conversations: typeof messages = [];

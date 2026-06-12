@@ -6,11 +6,15 @@ const openai = new OpenAI({
   apiKey: "local",
 });
 
-const MODEL = "google/gemma-3-4b-it";
+async function getModel(): Promise<string> {
+  const cfg = await prisma.autoLoop.findUnique({ where: { id: 1 } });
+  return cfg?.model ?? "google/gemma-3-4b-it";
+}
 
 async function chat(systemPrompt: string, userPrompt: string): Promise<string> {
+  const model = await getModel();
   const res = await openai.chat.completions.create({
-    model: MODEL,
+    model,
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
@@ -42,24 +46,37 @@ export async function runTick(): Promise<TickResult> {
 
 async function createPost(bot: { id: string; username: string; personality: string }) {
   const communities = await prisma.community.findMany();
-  const community = communities[Math.floor(Math.random() * communities.length)];
+
+  const communityNames = communities.map((c) => c.name).join(", ");
+  const pick = await chat(
+    bot.personality,
+    `Choose one community to post in today. Reply with only the community name — no explanation.\n\nCommunities: ${communityNames}`
+  );
+
+  const chosen =
+    communities.find((c) => c.name.toLowerCase() === pick.trim().toLowerCase()) ??
+    communities[Math.floor(Math.random() * communities.length)];
 
   const raw = await chat(
     bot.personality,
-    `You are posting on the r/${community.name} subreddit. Write a short Reddit-style post. ` +
+    `Write a short Reddit-style post for r/${chosen.name}. ` +
     `Respond with exactly two lines: first line is the title (no prefix), second line is the body (1-3 sentences). ` +
     `Stay in character. Do not add any labels or markdown.`
   );
 
   const lines = raw.split("\n").filter((l) => l.trim());
-  const title = lines[0]?.slice(0, 200) ?? "Untitled";
-  const content = lines.slice(1).join(" ").slice(0, 1000) || lines[0];
+  const title = lines[0]?.trim().slice(0, 200);
+  const content = lines.slice(1).join(" ").trim().slice(0, 1000) || lines[0]?.trim();
 
-  const post = await prisma.post.create({
-    data: { title, content, botId: bot.id, communityId: community.id },
+  if (!title || !content) {
+    throw new Error(`LLM returned unusable post content: ${JSON.stringify(raw)}`);
+  }
+
+  await prisma.post.create({
+    data: { title, content, botId: bot.id, communityId: chosen.id },
   });
 
-  return { action: "createPost", bot: bot.username, detail: `"${title}" in r/${community.name}` };
+  return { action: "createPost", bot: bot.username, detail: `"${title}" in r/${chosen.name}` };
 }
 
 async function commentOnPost(bot: { id: string; username: string; personality: string }) {
@@ -67,6 +84,7 @@ async function commentOnPost(bot: { id: string; username: string; personality: s
     take: 20,
     orderBy: { createdAt: "desc" },
     include: { community: true, bot: true },
+    where: { botId: { not: bot.id } },
   });
   if (posts.length === 0) return createPost(bot);
   const post = posts[Math.floor(Math.random() * posts.length)];

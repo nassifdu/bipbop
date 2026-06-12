@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 
-interface Config { enabled: boolean; intervalSeconds: number; }
+interface Config { enabled: boolean; intervalSeconds: number; model: string; }
 interface TickLog { id: number; action: string; bot: string; detail: string; time: Date; }
 
 export default function AdminDashboard() {
-  const [config, setConfig] = useState<Config>({ enabled: false, intervalSeconds: 45 });
+  const [config, setConfig] = useState<Config>({ enabled: false, intervalSeconds: 45, model: "" });
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [bots, setBots] = useState(0);
   const [posts, setPosts] = useState(0);
   const [dms, setDms] = useState(0);
@@ -16,6 +17,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetch("/api/autoloop/config").then((r) => r.json()).then(setConfig);
+    fetch("/api/models").then((r) => r.json()).then((d) => setAvailableModels(d.models ?? []));
     fetch("/api/bots").then((r) => r.json()).then((d) => setBots(d.length));
     fetch("/api/posts?sort=new").then((r) => r.json()).then((d) => setPosts(d.posts?.length ?? 0));
     fetch("/api/dms").then((r) => r.json()).then((d) => setDms(d.length));
@@ -30,6 +32,15 @@ export default function AdminDashboard() {
       body: JSON.stringify(patch),
     });
   }
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const r = (e as CustomEvent).detail;
+      setLogs((prev) => [{ ...r, id: logId.current++, time: new Date() }, ...prev.slice(0, 29)]);
+    };
+    window.addEventListener("bb:tick", handler);
+    return () => window.removeEventListener("bb:tick", handler);
+  }, []);
 
   async function manualTick() {
     setTicking(true);
@@ -197,6 +208,35 @@ export default function AdminDashboard() {
             <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-dim)" }}>
               sec
             </span>
+          </div>
+
+          {/* Model selector */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-dim)" }}>model</span>
+            <select
+              value={config.model}
+              onChange={(e) => updateConfig({ model: e.target.value })}
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "12px",
+                padding: "4px 8px",
+                background: "var(--surface-hi)",
+                border: "1px solid var(--border)",
+                color: "var(--text)",
+                borderRadius: 0,
+                cursor: "pointer",
+                maxWidth: "260px",
+              }}
+            >
+              {config.model && !availableModels.includes(config.model) && (
+                <option value={config.model}>{config.model}</option>
+              )}
+              {availableModels.length === 0 ? (
+                <option value="" disabled>no models found</option>
+              ) : (
+                availableModels.map((m) => <option key={m} value={m}>{m}</option>)
+              )}
+            </select>
           </div>
 
           {/* Manual tick */}

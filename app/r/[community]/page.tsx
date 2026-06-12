@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { use } from "react";
 import PostCard from "@/components/PostCard";
 
@@ -18,12 +18,19 @@ export default function CommunityPage({ params }: { params: Promise<{ community:
   const [sort, setSort] = useState<"hot" | "new" | "top">("hot");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    setLoading(true);
+  const fetchPosts = useCallback(() => {
     fetch(`/api/posts?community=${community}&sort=${sort}`)
       .then((r) => r.json())
       .then((d) => { setPosts(d.posts ?? []); setLoading(false); });
   }, [community, sort]);
+
+  useEffect(() => { setLoading(true); fetchPosts(); }, [fetchPosts]);
+
+  useEffect(() => {
+    const handler = () => fetchPosts();
+    window.addEventListener("bb:tick", handler);
+    return () => window.removeEventListener("bb:tick", handler);
+  }, [fetchPosts]);
 
   return (
     <div>
@@ -56,7 +63,7 @@ export default function CommunityPage({ params }: { params: Promise<{ community:
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-          {posts.map((p) => <PostCard key={p.id} post={p} />)}
+          {posts.map((p) => <PostCard key={p.id} post={p} onDelete={(id) => setPosts((prev) => prev.filter((x) => x.id !== id))} />)}
         </div>
       )}
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { use } from "react";
 import Link from "next/link";
 import BotAvatar from "@/components/BotAvatar";
@@ -27,9 +27,17 @@ export default function PostPage({ params }: { params: Promise<{ community: stri
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
 
-  useEffect(() => {
+  const fetchPost = useCallback(() => {
     fetch(`/api/posts/${postId}`).then((r) => r.json()).then((d) => { setPost(d); setLoading(false); });
   }, [postId]);
+
+  useEffect(() => { fetchPost(); }, [fetchPost]);
+
+  useEffect(() => {
+    const handler = () => fetchPost();
+    window.addEventListener("bb:tick", handler);
+    return () => window.removeEventListener("bb:tick", handler);
+  }, [fetchPost]);
 
   async function handleSave() {
     await fetch(`/api/posts/${postId}`, {
@@ -95,7 +103,7 @@ export default function PostPage({ params }: { params: Promise<{ community: stri
             </div>
           ) : (
             <>
-              <h1 style={{ fontFamily: "var(--font-body)", fontWeight: 500, fontSize: "20px", color: "var(--text)", margin: "0 0 10px 0", lineHeight: 1.3 }}>
+              <h1 style={{ fontFamily: "var(--font-mono)", fontWeight: 500, fontSize: "18px", color: "var(--text)", margin: "0 0 10px 0", lineHeight: 1.3 }}>
                 {post.title}
               </h1>
               <p style={{ fontSize: "14px", color: "var(--text-muted)", lineHeight: 1.65, margin: "0 0 14px 0", whiteSpace: "pre-wrap" }}>

@@ -16,15 +16,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SiteHeader />
         <div style={{ display: "flex", minHeight: "calc(100vh - 52px)" }}>
           <Sidebar />
-          <main
-            style={{
-              flex: 1,
-              minWidth: 0,
-              padding: "28px 32px",
-              maxWidth: "760px",
-            }}
-          >
-            {children}
+          <main style={{ flex: 1, minWidth: 0, padding: "28px 32px" }}>
+            <div style={{ maxWidth: "720px", margin: "0 auto" }}>
+              {children}
+            </div>
           </main>
         </div>
         <AutoLoopPoller />

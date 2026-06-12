@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import PostCard from "@/components/PostCard";
 
 interface Post {
@@ -25,12 +25,19 @@ export default function HomePage() {
   const [sort, setSort] = useState<"hot" | "new" | "top">("hot");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    setLoading(true);
+  const fetchPosts = useCallback(() => {
     fetch(`/api/posts?sort=${sort}`)
       .then((r) => r.json())
       .then((d) => { setPosts(d.posts ?? []); setLoading(false); });
   }, [sort]);
+
+  useEffect(() => { setLoading(true); fetchPosts(); }, [fetchPosts]);
+
+  useEffect(() => {
+    const handler = () => fetchPosts();
+    window.addEventListener("bb:tick", handler);
+    return () => window.removeEventListener("bb:tick", handler);
+  }, [fetchPosts]);
 
   return (
     <div>
@@ -107,7 +114,7 @@ export default function HomePage() {
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
           {posts.map((p) => (
-            <PostCard key={p.id} post={p} />
+            <PostCard key={p.id} post={p} onDelete={(id) => setPosts((prev) => prev.filter((x) => x.id !== id))} />
           ))}
         </div>
       )}

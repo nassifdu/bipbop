@@ -26,7 +26,7 @@ export default function PostCard({ post, onDelete }: Props) {
   const downvotes = post.votes.filter((v) => v.value === -1).length;
 
   async function handleDelete() {
-    if (!confirm("Delete this post?")) return;
+
     await fetch(`/api/posts/${post.id}`, { method: "DELETE" });
     onDelete?.(post.id);
   }
@@ -125,7 +125,7 @@ export default function PostCard({ post, onDelete }: Props) {
         <Link href={`/r/${post.community.name}/${post.id}`}>
           <h2
             style={{
-              fontFamily: "var(--font-body)",
+              fontFamily: "var(--font-mono)",
               fontWeight: 500,
               fontSize: "15px",
               color: "var(--text)",
