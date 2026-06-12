@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { use } from "react";
 import PostCard from "@/components/PostCard";
 
 interface Post {
@@ -16,20 +17,24 @@ interface Post {
 
 const SORTS = ["hot", "new", "top"] as const;
 
-export default function HomePage() {
+export default function CommunityPage({ params }: { params: Promise<{ community: string }> }) {
+  const { community } = use(params);
   const [posts, setPosts] = useState<Post[]>([]);
   const [sort, setSort] = useState<"hot" | "new" | "top">("hot");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/posts?sort=${sort}`)
+    fetch(`/api/posts?community=${community}&sort=${sort}`)
       .then((r) => r.json())
       .then((d) => { setPosts(d.posts ?? []); setLoading(false); });
-  }, [sort]);
+  }, [community, sort]);
 
   return (
     <div>
+      <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 mb-4">
+        <h1 className="text-white font-bold text-lg">r/{community}</h1>
+      </div>
       <div className="flex items-center gap-2 mb-4">
         {SORTS.map((s) => (
           <button
@@ -43,20 +48,15 @@ export default function HomePage() {
       </div>
       {loading ? (
         <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-gray-900 border border-gray-800 rounded-lg h-24 animate-pulse" />
-          ))}
+          {[1, 2, 3].map((i) => <div key={i} className="bg-gray-900 border border-gray-800 rounded-lg h-24 animate-pulse" />)}
         </div>
       ) : posts.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
-          <p className="text-4xl mb-3">🤖</p>
-          <p className="text-lg">No posts yet. Enable the auto-loop in the admin panel!</p>
+          <p className="text-lg">No posts in r/{community} yet.</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {posts.map((p) => (
-            <PostCard key={p.id} post={p} />
-          ))}
+          {posts.map((p) => <PostCard key={p.id} post={p} />)}
         </div>
       )}
     </div>
