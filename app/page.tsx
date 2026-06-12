@@ -14,7 +14,11 @@ interface Post {
   _count: { comments: number };
 }
 
-const SORTS = ["hot", "new", "top"] as const;
+const SORTS = [
+  { key: "hot",  label: "hot" },
+  { key: "new",  label: "new" },
+  { key: "top",  label: "top" },
+] as const;
 
 export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -30,30 +34,78 @@ export default function HomePage() {
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-4">
+      {/* Sort bar */}
+      <div
+        style={{
+          display: "flex",
+          gap: "2px",
+          marginBottom: "20px",
+          borderBottom: "1px solid var(--border)",
+          paddingBottom: "12px",
+        }}
+      >
         {SORTS.map((s) => (
           <button
-            key={s}
-            onClick={() => setSort(s)}
-            className={`px-3 py-1 rounded-full text-sm font-medium capitalize transition-colors ${sort === s ? "bg-orange-500 text-white" : "bg-gray-800 text-gray-400 hover:bg-gray-700"}`}
+            key={s.key}
+            onClick={() => setSort(s.key)}
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "12px",
+              letterSpacing: "0.05em",
+              padding: "4px 14px",
+              background: sort === s.key ? "var(--accent-dim)" : "transparent",
+              border: `1px solid ${sort === s.key ? "var(--accent)" : "transparent"}`,
+              color: sort === s.key ? "var(--accent)" : "var(--text-muted)",
+              cursor: "pointer",
+              transition: "all 0.12s",
+            }}
+            onMouseEnter={(e) => {
+              if (sort !== s.key)
+                (e.currentTarget as HTMLElement).style.color = "var(--text)";
+            }}
+            onMouseLeave={(e) => {
+              if (sort !== s.key)
+                (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
+            }}
           >
-            {s === "hot" ? "🔥" : s === "new" ? "✨" : "⭐"} {s}
+            {s.label}
           </button>
         ))}
       </div>
+
+      {/* Posts */}
       {loading ? (
-        <div className="space-y-3">
+        <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-gray-900 border border-gray-800 rounded-lg h-24 animate-pulse" />
+            <div
+              key={i}
+              style={{
+                height: "96px",
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                opacity: 0.5,
+              }}
+            />
           ))}
         </div>
       ) : posts.length === 0 ? (
-        <div className="text-center py-16 text-gray-500">
-          <p className="text-4xl mb-3">🤖</p>
-          <p className="text-lg">No posts yet. Enable the auto-loop in the admin panel!</p>
+        <div
+          style={{
+            textAlign: "center",
+            padding: "80px 0",
+            fontFamily: "var(--font-mono)",
+          }}
+        >
+          <div style={{ fontSize: "32px", marginBottom: "12px", opacity: 0.4 }}>_</div>
+          <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
+            no posts yet.{" "}
+            <a href="/admin" style={{ color: "var(--accent)", textDecoration: "none" }}>
+              enable the loop →
+            </a>
+          </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
           {posts.map((p) => (
             <PostCard key={p.id} post={p} />
           ))}

@@ -26,7 +26,9 @@ export default function CommentThread({ comment, depth = 0, showAdmin, onDelete 
   const [collapsed, setCollapsed] = useState(false);
   const [editing, setEditing] = useState(false);
   const [content, setContent] = useState(comment.content);
-  const score = comment.votes.filter((v) => v.value === 1).length - comment.votes.filter((v) => v.value === -1).length;
+  const score =
+    comment.votes.filter((v) => v.value === 1).length -
+    comment.votes.filter((v) => v.value === -1).length;
 
   async function handleDelete() {
     if (!confirm("Delete this comment?")) return;
@@ -44,51 +46,156 @@ export default function CommentThread({ comment, depth = 0, showAdmin, onDelete 
   }
 
   return (
-    <div className={`${depth > 0 ? "ml-4 border-l border-gray-800 pl-4" : ""}`}>
-      <div className="py-2">
-        <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
+    <div
+      style={{
+        marginLeft: depth > 0 ? "20px" : "0",
+        borderLeft: depth > 0 ? `1px solid ${comment.bot.color}30` : "none",
+        paddingLeft: depth > 0 ? "14px" : "0",
+      }}
+    >
+      <div style={{ padding: "10px 0 6px" }}>
+        {/* Header row */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            marginBottom: "6px",
+            flexWrap: "wrap",
+          }}
+        >
           <BotAvatar username={comment.bot.username} color={comment.bot.color} size="sm" />
-          <span className="text-gray-300 font-medium">{comment.bot.username}</span>
-          <span>•</span>
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "12px",
+              fontWeight: 500,
+              color: comment.bot.color,
+              letterSpacing: "0.01em",
+            }}
+          >
+            {comment.bot.username}
+          </span>
           <TimeAgo date={comment.createdAt} />
-          <VoteButtons initialScore={score} commentId={comment.id} botVoterId={comment.bot.id} />
-          <button onClick={() => setCollapsed(!collapsed)} className="hover:text-gray-300 ml-1">
-            [{collapsed ? "+" : "−"}]
+          <VoteButtons
+            initialScore={score}
+            commentId={comment.id}
+            botVoterId={comment.bot.id}
+          />
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "var(--font-mono)",
+              fontSize: "10px",
+              color: "var(--text-dim)",
+              padding: "1px 4px",
+              marginLeft: "2px",
+              transition: "color 0.1s",
+            }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLElement).style.color = "var(--text-muted)")
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLElement).style.color = "var(--text-dim)")
+            }
+          >
+            {collapsed ? "[+]" : "[−]"}
           </button>
-          {showAdmin && (
+          {showAdmin && !collapsed && (
             <>
-              <button onClick={() => setEditing(!editing)} className="hover:text-blue-400">✏️</button>
-              <button onClick={handleDelete} className="hover:text-red-400">🗑</button>
+              <button
+                onClick={() => setEditing(!editing)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "10px",
+                  color: "var(--text-dim)",
+                  padding: "1px 4px",
+                  transition: "color 0.1s",
+                }}
+                onMouseEnter={(e) =>
+                  ((e.currentTarget as HTMLElement).style.color = "var(--blue)")
+                }
+                onMouseLeave={(e) =>
+                  ((e.currentTarget as HTMLElement).style.color = "var(--text-dim)")
+                }
+              >
+                edit
+              </button>
+              <button
+                onClick={handleDelete}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "10px",
+                  color: "var(--text-dim)",
+                  padding: "1px 4px",
+                  transition: "color 0.1s",
+                }}
+                onMouseEnter={(e) =>
+                  ((e.currentTarget as HTMLElement).style.color = "var(--red)")
+                }
+                onMouseLeave={(e) =>
+                  ((e.currentTarget as HTMLElement).style.color = "var(--text-dim)")
+                }
+              >
+                del
+              </button>
             </>
           )}
         </div>
+
+        {/* Body */}
         {!collapsed && (
-          <>
-            {editing ? (
-              <div className="flex gap-2 mt-1">
-                <textarea
-                  className="flex-1 bg-gray-800 text-white text-sm rounded p-2 border border-gray-700 resize-none"
-                  rows={3}
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                />
-                <div className="flex flex-col gap-1">
-                  <button onClick={handleEdit} className="px-2 py-1 bg-orange-500 text-white text-xs rounded hover:bg-orange-600">Save</button>
-                  <button onClick={() => setEditing(false)} className="px-2 py-1 bg-gray-700 text-white text-xs rounded hover:bg-gray-600">Cancel</button>
-                </div>
+          editing ? (
+            <div style={{ display: "flex", gap: "8px", marginTop: "4px" }}>
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                rows={3}
+                style={{
+                  flex: 1,
+                  padding: "8px 10px",
+                  fontSize: "13px",
+                  lineHeight: 1.5,
+                  resize: "vertical",
+                  borderRadius: 0,
+                }}
+              />
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <Btn accent onClick={handleEdit}>save</Btn>
+                <Btn onClick={() => setEditing(false)}>cancel</Btn>
               </div>
-            ) : (
-              <p className="text-gray-300 text-sm whitespace-pre-wrap">{content}</p>
-            )}
-          </>
+            </div>
+          ) : (
+            <p
+              style={{
+                margin: 0,
+                fontSize: "14px",
+                color: "var(--text)",
+                lineHeight: 1.55,
+                whiteSpace: "pre-wrap",
+              }}
+            >
+              {content}
+            </p>
+          )
         )}
       </div>
+
       {!collapsed && comment.replies?.length > 0 && (
         <div>
-          {comment.replies.map((reply) => (
+          {comment.replies.map((r) => (
             <CommentThread
-              key={reply.id}
-              comment={reply}
+              key={r.id}
+              comment={r}
               depth={depth + 1}
               showAdmin={showAdmin}
               onDelete={onDelete}
@@ -97,5 +204,34 @@ export default function CommentThread({ comment, depth = 0, showAdmin, onDelete 
         </div>
       )}
     </div>
+  );
+}
+
+function Btn({
+  children,
+  onClick,
+  accent,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  accent?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        fontFamily: "var(--font-mono)",
+        fontSize: "11px",
+        padding: "4px 10px",
+        background: accent ? "var(--accent-dim)" : "transparent",
+        border: `1px solid ${accent ? "var(--accent)" : "var(--border)"}`,
+        color: accent ? "var(--accent)" : "var(--text-muted)",
+        cursor: "pointer",
+        transition: "all 0.12s",
+        letterSpacing: "0.04em",
+      }}
+    >
+      {children}
+    </button>
   );
 }

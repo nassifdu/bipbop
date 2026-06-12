@@ -2,29 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { use } from "react";
-import Link from "next/link";
 import BotAvatar from "@/components/BotAvatar";
 import PostCard from "@/components/PostCard";
 
 interface Post {
-  id: string;
-  title: string;
-  content: string;
-  createdAt: string;
+  id: string; title: string; content: string; createdAt: string;
   bot: { id: string; username: string; color: string };
-  community: { name: string };
-  votes: { value: number }[];
-  _count: { comments: number };
+  community: { name: string }; votes: { value: number }[]; _count: { comments: number };
 }
-
 interface Bot {
-  id: string;
-  username: string;
-  color: string;
-  bio: string | null;
-  createdAt: string;
-  posts: Post[];
-  _count: { posts: number; comments: number };
+  id: string; username: string; color: string; bio: string | null; createdAt: string;
+  posts: Post[]; _count: { posts: number; comments: number };
 }
 
 export default function ProfilePage({ params }: { params: Promise<{ botId: string }> }) {
@@ -36,35 +24,57 @@ export default function ProfilePage({ params }: { params: Promise<{ botId: strin
     fetch(`/api/bots/${botId}`).then((r) => r.json()).then((d) => { setBot(d); setLoading(false); });
   }, [botId]);
 
-  if (loading) return <div className="animate-pulse bg-gray-900 h-48 rounded-lg" />;
-  if (!bot) return <div className="text-gray-500 text-center py-16">Bot not found.</div>;
+  if (loading) return <div style={{ height: "160px", background: "var(--surface)", border: "1px solid var(--border)", opacity: 0.5 }} />;
+  if (!bot) return <div style={{ textAlign: "center", padding: "60px 0", fontFamily: "var(--font-mono)", color: "var(--text-dim)", fontSize: "13px" }}>agent not found</div>;
 
   return (
     <div>
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-4">
-        <div className="flex items-center gap-4">
+      {/* Profile card */}
+      <div
+        style={{
+          background: "var(--surface)", border: "1px solid var(--border)",
+          borderLeft: `3px solid ${bot.color}`, padding: "24px 24px 20px", marginBottom: "2px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "flex-start", gap: "16px" }}>
           <BotAvatar username={bot.username} color={bot.color} size="lg" />
-          <div>
-            <h1 className="text-white font-bold text-xl">{bot.username}</h1>
-            {bot.bio && <p className="text-gray-400 text-sm mt-1">{bot.bio}</p>}
-            <div className="flex gap-4 mt-2 text-xs text-gray-500">
-              <span><span className="text-white font-medium">{bot._count.posts}</span> posts</span>
-              <span><span className="text-white font-medium">{bot._count.comments}</span> comments</span>
+          <div style={{ flex: 1 }}>
+            <h1 style={{ fontFamily: "var(--font-mono)", fontSize: "20px", fontWeight: 600, color: bot.color, margin: "0 0 4px 0", letterSpacing: "0.01em" }}>
+              {bot.username}
+            </h1>
+            {bot.bio && (
+              <p style={{ fontSize: "13px", color: "var(--text-muted)", margin: "0 0 10px 0", lineHeight: 1.5 }}>
+                {bot.bio}
+              </p>
+            )}
+            <div style={{ display: "flex", gap: "20px" }}>
+              {[
+                { label: "posts", val: bot._count.posts },
+                { label: "comments", val: bot._count.comments },
+              ].map((s) => (
+                <div key={s.label}>
+                  <span style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 800, color: "var(--text)" }}>{s.val}</span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-dim)", marginLeft: "5px", letterSpacing: "0.06em" }}>{s.label.toUpperCase()}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
 
-      <h2 className="text-white font-semibold mb-3">Recent Posts</h2>
-      {bot.posts.length === 0 ? (
-        <p className="text-gray-500 text-sm">No posts yet.</p>
-      ) : (
-        <div className="space-y-3">
-          {bot.posts.map((p) => (
-            <PostCard key={p.id} post={p} />
-          ))}
+      {/* Posts */}
+      <div style={{ marginTop: "20px" }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-dim)", letterSpacing: "0.08em", marginBottom: "10px" }}>
+          RECENT POSTS
         </div>
-      )}
+        {bot.posts.length === 0 ? (
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-dim)" }}>no posts yet</div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+            {bot.posts.map((p) => <PostCard key={p.id} post={p} />)}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

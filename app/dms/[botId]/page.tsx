@@ -6,9 +6,7 @@ import BotAvatar from "@/components/BotAvatar";
 import TimeAgo from "@/components/TimeAgo";
 
 interface Message {
-  id: string;
-  content: string;
-  createdAt: string;
+  id: string; content: string; createdAt: string;
   sender: { id: string; username: string; color: string };
   receiver: { id: string; username: string; color: string };
 }
@@ -21,7 +19,7 @@ export default function DMConvoPage({ params }: { params: Promise<{ botId: strin
 
   useEffect(() => {
     fetch(`/api/dms/${botId}`).then((r) => r.json()).then((d) => { setMessages(d); setLoading(false); });
-    fetch(`/api/bots/${botId}`).then((r) => r.json()).then((d) => setBot(d));
+    fetch(`/api/bots/${botId}`).then((r) => r.json()).then(setBot);
   }, [botId]);
 
   async function handleDelete(id: string) {
@@ -30,34 +28,63 @@ export default function DMConvoPage({ params }: { params: Promise<{ botId: strin
     setMessages((m) => m.filter((msg) => msg.id !== id));
   }
 
-  if (loading) return <div className="animate-pulse bg-gray-900 h-64 rounded-lg" />;
-
   return (
     <div>
-      <div className="flex items-center gap-3 mb-4 bg-gray-900 border border-gray-800 rounded-lg p-4">
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "24px", borderBottom: "1px solid var(--border)", paddingBottom: "16px" }}>
         {bot && <BotAvatar username={bot.username} color={bot.color} size="lg" />}
-        <h1 className="text-white font-bold text-lg">{bot?.username}</h1>
+        <div>
+          <h1 style={{ fontFamily: "var(--font-mono)", fontSize: "18px", fontWeight: 600, color: bot?.color ?? "var(--text)", margin: "0 0 3px 0" }}>
+            {bot?.username}
+          </h1>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-dim)" }}>
+            {messages.length} messages
+          </span>
+        </div>
       </div>
-      <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 space-y-4 max-h-[70vh] overflow-y-auto">
-        {messages.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">No messages in this conversation.</p>
-        ) : (
-          messages.map((m) => (
-            <div key={m.id} className="flex gap-3">
-              <BotAvatar username={m.sender.username} color={m.sender.color} size="sm" />
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-white text-sm font-medium">{m.sender.username}</span>
-                  <span className="text-gray-600 text-xs">→</span>
-                  <span className="text-gray-400 text-sm">{m.receiver.username}</span>
-                  <TimeAgo date={m.createdAt} />
-                  <button onClick={() => handleDelete(m.id)} className="text-gray-600 hover:text-red-400 text-xs ml-1">🗑</button>
-                </div>
-                <p className="text-gray-300 text-sm">{m.content}</p>
+
+      {/* Messages */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "1px", maxHeight: "65vh", overflowY: "auto" }}>
+        {loading ? (
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-dim)", padding: "20px 0" }}>loading…</div>
+        ) : messages.length === 0 ? (
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-dim)", padding: "40px 0", textAlign: "center" }}>
+            no messages in this conversation
+          </div>
+        ) : messages.map((m) => (
+          <div key={m.id}
+            style={{
+              display: "flex", gap: "12px", padding: "12px 14px",
+              background: "var(--surface)", border: "1px solid var(--border)",
+              borderLeft: `2px solid ${m.sender.color}`,
+              transition: "background 0.1s",
+            }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "var(--surface-hi)")}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "var(--surface)")}
+          >
+            <BotAvatar username={m.sender.username} color={m.sender.color} size="sm" />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", fontWeight: 500, color: m.sender.color }}>
+                  {m.sender.username}
+                </span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-dim)" }}>→</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-muted)" }}>
+                  {m.receiver.username}
+                </span>
+                <TimeAgo date={m.createdAt} />
+                <button onClick={() => handleDelete(m.id)}
+                  style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--text-dim)", padding: "0 4px", transition: "color 0.1s" }}
+                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--red)")}
+                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-dim)")}
+                >del</button>
               </div>
+              <p style={{ margin: 0, fontSize: "14px", color: "var(--text)", lineHeight: 1.5 }}>
+                {m.content}
+              </p>
             </div>
-          ))
-        )}
+          </div>
+        ))}
       </div>
     </div>
   );

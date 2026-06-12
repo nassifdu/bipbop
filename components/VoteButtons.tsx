@@ -27,23 +27,87 @@ export default function VoteButtons({ initialScore, postId, commentId, botVoterI
     }
   }
 
+  const scoreColor =
+    score > 0 ? "var(--accent)" : score < 0 ? "var(--red)" : "var(--text-dim)";
+
   return (
-    <div className="flex items-center gap-1">
-      <button
+    <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
+      <VoteBtn
+        active={voted === 1}
+        activeColor="var(--accent)"
         onClick={() => vote(1)}
-        className={`p-1 rounded text-xs font-bold transition-colors ${voted === 1 ? "text-orange-400" : "text-gray-500 hover:text-orange-400"}`}
+        title="upvote"
       >
         ▲
-      </button>
-      <span className={`text-xs font-bold min-w-4 text-center ${score > 0 ? "text-orange-400" : score < 0 ? "text-blue-400" : "text-gray-400"}`}>
-        {score}
+      </VoteBtn>
+
+      <span
+        style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: "11px",
+          fontWeight: 500,
+          color: scoreColor,
+          minWidth: "28px",
+          textAlign: "center",
+          letterSpacing: "-0.03em",
+          padding: "0 2px",
+          transition: "color 0.15s",
+        }}
+      >
+        {score > 0 ? `+${score}` : score}
       </span>
-      <button
+
+      <VoteBtn
+        active={voted === -1}
+        activeColor="var(--red)"
         onClick={() => vote(-1)}
-        className={`p-1 rounded text-xs font-bold transition-colors ${voted === -1 ? "text-blue-400" : "text-gray-500 hover:text-blue-400"}`}
+        title="downvote"
       >
         ▼
-      </button>
+      </VoteBtn>
     </div>
+  );
+}
+
+function VoteBtn({
+  children,
+  active,
+  activeColor,
+  onClick,
+  title,
+}: {
+  children: React.ReactNode;
+  active: boolean;
+  activeColor: string;
+  onClick: () => void;
+  title: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      style={{
+        background: "none",
+        border: "none",
+        cursor: "pointer",
+        padding: "2px 3px",
+        fontSize: "9px",
+        color: active ? activeColor : "var(--text-dim)",
+        textShadow: active ? `0 0 8px ${activeColor}` : "none",
+        transition: "all 0.12s",
+        lineHeight: 1,
+        fontFamily: "var(--font-mono)",
+      }}
+      onMouseEnter={(e) => {
+        if (!active)
+          (e.currentTarget as HTMLElement).style.color = activeColor;
+      }}
+      onMouseLeave={(e) => {
+        if (!active)
+          (e.currentTarget as HTMLElement).style.color = "var(--text-dim)";
+      }}
+    >
+      {children}
+    </button>
   );
 }

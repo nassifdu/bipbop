@@ -32,47 +32,201 @@ export default function PostCard({ post, onDelete }: Props) {
   }
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 hover:border-gray-700 transition-colors">
-      <div className="flex gap-3">
-        <div className="flex flex-col items-center gap-1 pt-1">
-          <VoteButtons
-            initialScore={upvotes - downvotes}
-            postId={post.id}
-            botVoterId={post.bot.id}
-          />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 text-xs text-gray-500 mb-1 flex-wrap">
-            <Link href={`/r/${post.community.name}`} className="text-orange-400 hover:underline font-medium">
-              r/{post.community.name}
-            </Link>
-            <span>•</span>
-            <BotAvatar username={post.bot.username} color={post.bot.color} size="sm" />
-            <Link href={`/profile/${post.bot.id}`} className="hover:text-gray-300">
-              {post.bot.username}
-            </Link>
-            <span>•</span>
-            <TimeAgo date={post.createdAt} />
-          </div>
-          <Link href={`/r/${post.community.name}/${post.id}`}>
-            <h2 className="text-white font-semibold hover:text-orange-400 transition-colors leading-tight mb-1">
-              {post.title}
-            </h2>
+    <article
+      style={{
+        display: "flex",
+        background: "var(--surface)",
+        borderTop: "1px solid var(--border)",
+        borderRight: "1px solid var(--border)",
+        borderBottom: "1px solid var(--border)",
+        borderLeft: `3px solid ${post.bot.color}`,
+        transition: "border-color 0.12s, background 0.12s",
+        marginBottom: "2px",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.background = "var(--surface-hi)";
+        (e.currentTarget as HTMLElement).style.borderTopColor = "var(--border-hi)";
+        (e.currentTarget as HTMLElement).style.borderRightColor = "var(--border-hi)";
+        (e.currentTarget as HTMLElement).style.borderBottomColor = "var(--border-hi)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.background = "var(--surface)";
+        (e.currentTarget as HTMLElement).style.borderTopColor = "var(--border)";
+        (e.currentTarget as HTMLElement).style.borderRightColor = "var(--border)";
+        (e.currentTarget as HTMLElement).style.borderBottomColor = "var(--border)";
+      }}
+    >
+      {/* Vote column */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "flex-start",
+          padding: "14px 10px",
+          borderRight: "1px solid var(--border)",
+          gap: "2px",
+        }}
+      >
+        <VoteButtons
+          initialScore={upvotes - downvotes}
+          postId={post.id}
+          botVoterId={post.bot.id}
+        />
+      </div>
+
+      {/* Content */}
+      <div style={{ flex: 1, minWidth: 0, padding: "14px 16px" }}>
+        {/* Meta row */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            marginBottom: "6px",
+            flexWrap: "wrap",
+          }}
+        >
+          <Link
+            href={`/r/${post.community.name}`}
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "11px",
+              color: "var(--accent)",
+              letterSpacing: "0.02em",
+            }}
+          >
+            #{post.community.name}
           </Link>
-          <p className="text-gray-400 text-sm line-clamp-2">{post.content}</p>
-          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-            <Link href={`/r/${post.community.name}/${post.id}`} className="hover:text-gray-300">
-              💬 {post._count.comments} comments
-            </Link>
-            <Link href={`/r/${post.community.name}/${post.id}`} className="hover:text-blue-400">
-              ✏️ edit
-            </Link>
-            <button onClick={handleDelete} className="hover:text-red-400">
-              🗑 delete
-            </button>
-          </div>
+          <Dot />
+          <BotAvatar username={post.bot.username} color={post.bot.color} size="sm" />
+          <Link
+            href={`/profile/${post.bot.id}`}
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "11px",
+              color: "var(--text-muted)",
+              transition: "color 0.1s",
+            }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLElement).style.color = "var(--text)")
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLElement).style.color = "var(--text-muted)")
+            }
+          >
+            {post.bot.username}
+          </Link>
+          <Dot />
+          <TimeAgo date={post.createdAt} />
+        </div>
+
+        {/* Title */}
+        <Link href={`/r/${post.community.name}/${post.id}`}>
+          <h2
+            style={{
+              fontFamily: "var(--font-body)",
+              fontWeight: 500,
+              fontSize: "15px",
+              color: "var(--text)",
+              margin: "0 0 6px 0",
+              lineHeight: 1.35,
+              transition: "color 0.1s",
+            }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLElement).style.color = "var(--accent)")
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLElement).style.color = "var(--text)")
+            }
+          >
+            {post.title}
+          </h2>
+        </Link>
+
+        {/* Excerpt */}
+        <p
+          style={{
+            fontSize: "13px",
+            color: "var(--text-muted)",
+            margin: "0 0 10px 0",
+            lineHeight: 1.5,
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          }}
+        >
+          {post.content}
+        </p>
+
+        {/* Action row */}
+        <div
+          style={{
+            display: "flex",
+            gap: "16px",
+            alignItems: "center",
+          }}
+        >
+          <ActionLink href={`/r/${post.community.name}/${post.id}`}>
+            {post._count.comments} replies
+          </ActionLink>
+          <ActionLink href={`/r/${post.community.name}/${post.id}`}>
+            edit
+          </ActionLink>
+          <button
+            onClick={handleDelete}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "var(--font-mono)",
+              fontSize: "11px",
+              color: "var(--text-dim)",
+              padding: 0,
+              transition: "color 0.1s",
+              letterSpacing: "0.02em",
+            }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLElement).style.color = "var(--red)")
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLElement).style.color = "var(--text-dim)")
+            }
+          >
+            delete
+          </button>
         </div>
       </div>
-    </div>
+    </article>
+  );
+}
+
+function Dot() {
+  return (
+    <span style={{ color: "var(--text-dim)", fontSize: "10px" }}>·</span>
+  );
+}
+
+function ActionLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      style={{
+        fontFamily: "var(--font-mono)",
+        fontSize: "11px",
+        color: "var(--text-dim)",
+        letterSpacing: "0.02em",
+        transition: "color 0.1s",
+      }}
+      onMouseEnter={(e) =>
+        ((e.currentTarget as HTMLElement).style.color = "var(--text-muted)")
+      }
+      onMouseLeave={(e) =>
+        ((e.currentTarget as HTMLElement).style.color = "var(--text-dim)")
+      }
+    >
+      {children}
+    </Link>
   );
 }

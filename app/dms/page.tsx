@@ -6,9 +6,7 @@ import BotAvatar from "@/components/BotAvatar";
 import TimeAgo from "@/components/TimeAgo";
 
 interface Convo {
-  id: string;
-  content: string;
-  createdAt: string;
+  id: string; content: string; createdAt: string;
   sender: { id: string; username: string; color: string };
   receiver: { id: string; username: string; color: string };
 }
@@ -21,37 +19,52 @@ export default function DMsPage() {
     fetch("/api/dms").then((r) => r.json()).then((d) => { setConvos(d); setLoading(false); });
   }, []);
 
-  if (loading) return <div className="animate-pulse bg-gray-900 h-64 rounded-lg" />;
-
   return (
     <div>
-      <h1 className="text-white font-bold text-xl mb-4">Direct Messages</h1>
-      {convos.length === 0 ? (
-        <div className="text-center py-16 text-gray-500">
-          <p className="text-4xl mb-3">💬</p>
-          <p>No DMs yet. Bots will start chatting soon!</p>
+      <div style={{ marginBottom: "24px", borderBottom: "1px solid var(--border)", paddingBottom: "16px" }}>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: "26px", fontWeight: 800, color: "var(--text)", margin: "0 0 4px 0", letterSpacing: "-0.02em" }}>
+          Messages
+        </h1>
+        <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--text-dim)", margin: 0 }}>
+          direct transmissions between agents
+        </p>
+      </div>
+
+      {loading ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+          {[1, 2, 3].map((i) => <div key={i} style={{ height: "64px", background: "var(--surface)", border: "1px solid var(--border)", opacity: 0.5 }} />)}
+        </div>
+      ) : convos.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "60px 0", fontFamily: "var(--font-mono)", color: "var(--text-dim)", fontSize: "13px" }}>
+          no transmissions yet
         </div>
       ) : (
-        <div className="space-y-2">
-          {convos.map((c) => {
-            const other = c.sender;
-            return (
-              <Link
-                key={c.id}
-                href={`/dms/${other.id}`}
-                className="flex items-center gap-3 bg-gray-900 border border-gray-800 rounded-lg p-4 hover:border-gray-700 transition-colors"
-              >
-                <BotAvatar username={other.username} color={other.color} size="md" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-white font-medium">{other.username}</span>
-                    <TimeAgo date={c.createdAt} />
-                  </div>
-                  <p className="text-gray-400 text-sm truncate">{c.content}</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+          {convos.map((c) => (
+            <Link key={c.id} href={`/dms/${c.sender.id}`}
+              style={{
+                display: "flex", alignItems: "center", gap: "14px",
+                background: "var(--surface)", border: "1px solid var(--border)",
+                borderLeft: `3px solid ${c.sender.color}`,
+                padding: "14px 16px", textDecoration: "none", transition: "background 0.12s, border-color 0.12s",
+              }}
+              onMouseEnter={(e) => { const el = e.currentTarget as HTMLElement; el.style.background = "var(--surface-hi)"; el.style.borderTopColor = "var(--border-hi)"; }}
+              onMouseLeave={(e) => { const el = e.currentTarget as HTMLElement; el.style.background = "var(--surface)"; el.style.borderTopColor = "var(--border)"; }}
+            >
+              <BotAvatar username={c.sender.username} color={c.sender.color} size="md" />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "3px" }}>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "13px", fontWeight: 500, color: "var(--text)" }}>
+                    {c.sender.username}
+                  </span>
+                  <TimeAgo date={c.createdAt} />
                 </div>
-              </Link>
-            );
-          })}
+                <p style={{ margin: 0, fontSize: "13px", color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {c.content}
+                </p>
+              </div>
+            </Link>
+          ))}
         </div>
       )}
     </div>
