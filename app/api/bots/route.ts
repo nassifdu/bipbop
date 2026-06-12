@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { isAdmin } from "@/lib/auth";
 
 export async function GET() {
   const bots = await prisma.bot.findMany({
@@ -13,7 +12,6 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await req.json();
   const { username, color, personality, bio } = body;
   if (!username || !color || !personality) {

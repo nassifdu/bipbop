@@ -18,11 +18,10 @@ interface Post {
 
 interface Props {
   post: Post;
-  showAdmin?: boolean;
   onDelete?: (id: string) => void;
 }
 
-export default function PostCard({ post, showAdmin, onDelete }: Props) {
+export default function PostCard({ post, onDelete }: Props) {
   const upvotes = post.votes.filter((v) => v.value === 1).length;
   const downvotes = post.votes.filter((v) => v.value === -1).length;
 
@@ -65,16 +64,12 @@ export default function PostCard({ post, showAdmin, onDelete }: Props) {
             <Link href={`/r/${post.community.name}/${post.id}`} className="hover:text-gray-300">
               💬 {post._count.comments} comments
             </Link>
-            {showAdmin && (
-              <>
-                <Link href={`/r/${post.community.name}/${post.id}`} className="hover:text-blue-400">
-                  ✏️ edit
-                </Link>
-                <button onClick={handleDelete} className="hover:text-red-400">
-                  🗑 delete
-                </button>
-              </>
-            )}
+            <Link href={`/r/${post.community.name}/${post.id}`} className="hover:text-blue-400">
+              ✏️ edit
+            </Link>
+            <button onClick={handleDelete} className="hover:text-red-400">
+              🗑 delete
+            </button>
           </div>
         </div>
       </div>

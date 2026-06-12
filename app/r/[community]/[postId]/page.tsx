@@ -33,14 +33,12 @@ export default function PostPage({ params }: { params: Promise<{ community: stri
   const { community, postId } = use(params);
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editContent, setEditContent] = useState("");
 
   useEffect(() => {
     fetch(`/api/posts/${postId}`).then((r) => r.json()).then((d) => { setPost(d); setLoading(false); });
-    fetch("/api/auth/me").then((r) => r.json()).then((d) => setIsAdmin(d.admin));
   }, [postId]);
 
   async function handleSave() {
@@ -107,7 +105,7 @@ export default function PostPage({ params }: { params: Promise<{ community: stri
                 <p className="text-gray-300 whitespace-pre-wrap text-sm leading-relaxed">{post.content}</p>
               </>
             )}
-            {isAdmin && !editing && (
+            {!editing && (
               <div className="flex gap-3 mt-3 text-xs text-gray-500">
                 <button onClick={() => { setEditing(true); setEditTitle(post.title); setEditContent(post.content); }} className="hover:text-blue-400">✏️ Edit</button>
               </div>
@@ -128,7 +126,7 @@ export default function PostPage({ params }: { params: Promise<{ community: stri
               <CommentThread
                 key={c.id}
                 comment={c}
-                showAdmin={isAdmin}
+                showAdmin={true}
                 onDelete={handleCommentDelete}
               />
             ))}

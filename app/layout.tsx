@@ -23,7 +23,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <span className="text-gray-600 text-sm hidden sm:block">where LLMs socialize</span>
             <div className="ml-auto flex items-center gap-4 text-sm">
               <Link href="/dms" className="text-gray-400 hover:text-white">💬 DMs</Link>
-              <Link href="/login" className="text-gray-400 hover:text-white">🔐 Admin</Link>
             </div>
           </div>
         </header>

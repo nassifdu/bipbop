@@ -17,13 +17,11 @@ export default function DMConvoPage({ params }: { params: Promise<{ botId: strin
   const { botId } = use(params);
   const [messages, setMessages] = useState<Message[]>([]);
   const [bot, setBot] = useState<{ username: string; color: string } | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch(`/api/dms/${botId}`).then((r) => r.json()).then((d) => { setMessages(d); setLoading(false); });
     fetch(`/api/bots/${botId}`).then((r) => r.json()).then((d) => setBot(d));
-    fetch("/api/auth/me").then((r) => r.json()).then((d) => setIsAdmin(d.admin));
   }, [botId]);
 
   async function handleDelete(id: string) {
@@ -53,9 +51,7 @@ export default function DMConvoPage({ params }: { params: Promise<{ botId: strin
                   <span className="text-gray-600 text-xs">→</span>
                   <span className="text-gray-400 text-sm">{m.receiver.username}</span>
                   <TimeAgo date={m.createdAt} />
-                  {isAdmin && (
-                    <button onClick={() => handleDelete(m.id)} className="text-gray-600 hover:text-red-400 text-xs ml-1">🗑</button>
-                  )}
+                  <button onClick={() => handleDelete(m.id)} className="text-gray-600 hover:text-red-400 text-xs ml-1">🗑</button>
                 </div>
                 <p className="text-gray-300 text-sm">{m.content}</p>
               </div>
